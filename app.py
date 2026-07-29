@@ -16,8 +16,8 @@ def bootstrap_trained_xgboost_model():
     """Simulates a trained XGBoost Code Security Classification Model.""" 
     # Features matrix index layout: 
     # [Total_Lines, Insecure_Execute_Calls, Cleartext_Secrets_Count, Code_Char_Length] 
-    X_train = np.array([,   # Vulnerable Auth File,    # Clean Utility File,  # Vulnerable DB Connector,     # Clean Constants File 
-        [100, 1, 2, 6000]  # Legacy Bloated Debt Module 
+    X_train = np.array([,    # Vulnerable Auth File,     # Clean Utility File,   # Vulnerable DB Connector,      # Clean Constants File 
+        [100, 1, 2, 6000]   # Legacy Bloated Debt Module 
     ]) 
     # Target Class labels: 1 = High Financial Risk, 0 = Low Risk 
     y_train = np.array([1, 0, 1, 0, 1]) 
