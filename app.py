@@ -14,12 +14,12 @@ from sklearn.preprocessing import LabelEncoder
 @st.cache_resource 
 def bootstrap_trained_xgboost_model(): 
     """Simulates a trained XGBoost Code Security Classification Model.""" 
-    X_train = np.array([, 
-, 
-, 
-, 
-        [100, 1, 2, 6000] 
+    # Features matrix index layout: 
+    # [Total_Lines, Insecure_Execute_Calls, Cleartext_Secrets_Count, Code_Char_Length] 
+    X_train = np.array([,   # Vulnerable Auth File,    # Clean Utility File,  # Vulnerable DB Connector,     # Clean Constants File 
+        [100, 1, 2, 6000]  # Legacy Bloated Debt Module 
     ]) 
+    # Target Class labels: 1 = High Financial Risk, 0 = Low Risk 
     y_train = np.array([1, 0, 1, 0, 1]) 
 
     xgb_model = xgb.XGBClassifier( 
@@ -50,7 +50,7 @@ class TechDebtUnderwriter:
         try: 
             tree = ast.parse(code_string) 
             for node in ast.walk(tree): 
-                # FIX: Strict string match avoids matching 'execute_script'
+                # FIX: Strict string match avoids matching 'execute_script' 
                 if isinstance(node, ast.Call) and hasattr(node.func, 'attr') and node.func.attr == 'execute': 
                     for arg in node.args: 
                         if isinstance(arg, ast.JoinedStr): 
@@ -61,7 +61,7 @@ class TechDebtUnderwriter:
                 cleartext_secrets += 1 
                 findings.append(("HARDCODED_SECRET", "Plaintext authorization token assignment located.")) 
             
-            # FIX: Raised character limit from 5,000 to 50,000 to accept deep dashboard layout sizes
+            # FIX: Raised character limit from 5,000 to 50,000 to accept deep dashboard layout sizes 
             if code_string.count("def ") > 0 and char_length > 50000: 
                 findings.append(("COMPLEX_LOGIC_BLOCK", "High-entropy block limits horizontal scalability.")) 
         except SyntaxError: 
@@ -139,7 +139,7 @@ if uploaded_zip is not None:
     all_extracted_flaws = [] 
     with zipfile.ZipFile(io.BytesIO(uploaded_zip.read())) as archive: 
         for file_path in archive.namelist(): 
-            # FIX: Only look at valid python files and filter out wake_app.py
+            # FIX: Only look at valid python files and filter out wake_app.py 
             if file_path.endswith('.py') and "wake_app.py" not in file_path: 
                 with archive.open(file_path) as file_handler: 
                     source_payload = file_handler.read().decode('utf-8', errors='ignore') 
