@@ -13,23 +13,28 @@ from sklearn.preprocessing import LabelEncoder
 # ===================================================================== 
 @st.cache_resource 
 def bootstrap_trained_xgboost_model(): 
-    """Simulates a trained XGBoost Code Security Classification Model.""" 
+    """Simulates a trained XGBoost Code Security Classification Model. 
+    In production, this model is trained on structural code metric profiles. 
+    """ 
     # Features matrix index layout: 
     # [Total_Lines, Insecure_Execute_Calls, Cleartext_Secrets_Count, Code_Char_Length] 
-    X_train = np.array([,    # Vulnerable Auth File,     # Clean Utility File,   # Vulnerable DB Connector,      # Clean Constants File 
-        [100, 1, 2, 6000]   # Legacy Bloated Debt Module 
+    X_train = np.array([,   # Vulnerable Auth File,    # Clean Utility File,  # Vulnerable DB Connector,     # Clean Constants File 
+        [100, 1, 2, 6000]  # Legacy Bloated Debt Module 
     ]) 
     # Target Class labels: 1 = High Financial Risk, 0 = Low Risk 
     y_train = np.array([1, 0, 1, 0, 1]) 
 
+    # Initialize the ultra-fast XGBoost Binary Classification Model 
     xgb_model = xgb.XGBClassifier( 
         max_depth=3, 
         learning_rate=0.1, 
         n_estimators=10, 
         objective='binary:logistic' 
     ) 
+    # Perform standard mathematical model fitting across the numerical feature spaces 
     xgb_model.fit(X_train, y_train) 
     return xgb_model 
+
 
 class TechDebtUnderwriter: 
     def __init__(self, sql_cost, secret_cost, complexity_cost, labor_rate): 
@@ -41,7 +46,10 @@ class TechDebtUnderwriter:
         } 
 
     def scan_code_with_ast(self, filename, code_string): 
+        """Phase 1 Feature Extraction: Transforms raw code characters into numerical metric indicators.""" 
         findings = [] 
+        
+        # Calculate raw numerical feature dimensions for XGBoost array mapping 
         total_lines = len(code_string.split('\n')) 
         insecure_executes = 0 
         cleartext_secrets = 0 
@@ -67,13 +75,19 @@ class TechDebtUnderwriter:
         except SyntaxError: 
             findings.append(("COMPLEX_LOGIC_BLOCK", "Syntax compilation error found in module structure.")) 
         
+        # Compile extracted numeric vector profiles for machine learning processing 
         numeric_feature_vector = [total_lines, insecure_executes, cleartext_secrets, char_length] 
         return findings, numeric_feature_vector 
 
     def run_xgboost_inference(self, model_engine, feature_vector): 
+        """Phase 2 Classical ML Inference: Executes gradient-boosted decision trees over numeric features.""" 
         if model_engine is None: 
             return "XGBoost Module Offline." 
+        
+        # Reshape custom feature coordinates to match expected 2D matrix layout 
         input_data = np.array([feature_vector]) 
+        
+        # Calculate probability and predicted high-risk class allocations 
         prediction = model_engine.predict(input_data)[0] 
         probability = model_engine.predict_proba(input_data)[0][1] * 100 
         
@@ -105,6 +119,7 @@ class TechDebtUnderwriter:
                 }) 
         return total_liability, total_hours, detailed_breakdown 
 
+
 # ===================================================================== 
 # STREAMLIT HCI INTERACTIVE DASHBOARD USER INTERFACE 
 # ===================================================================== 
@@ -112,6 +127,7 @@ st.set_page_config(page_title="Domain VII: XGBoost AI Underwriter", layout="wide
 st.title("🛡️ Enterprise XGBoost Software Debt Underwriter") 
 st.caption("Fulfilling TCoE Domain VII: Gradient-Boosted Decision Tree Inference Application") 
 
+# Sidebar - Parameter Controllers 
 st.sidebar.header("🎛️ Underwriting Cost Variables") 
 param_sql_cost = st.sidebar.slider("SQLi Breach Penalty (₹)", 100000, 1500000, 500000) 
 param_secret_cost = st.sidebar.slider("Token Leak Cost (₹)", 50000, 500000, 250000) 
@@ -121,6 +137,7 @@ param_labor_rate = st.sidebar.slider("Dev Engineering Hourly Rate (₹)", 500, 5
 st.sidebar.header("🤖 Local Classical ML Node") 
 ml_enabled = st.sidebar.checkbox("Activate Embedded XGBoost Classifier Pipeline", value=True) 
 
+# Bootstrap the XGBoost model natively inside application process memory space 
 xgb_engine = None 
 if ml_enabled: 
     xgb_engine = bootstrap_trained_xgboost_model() 
@@ -133,6 +150,7 @@ fallback_code_demo = """def auth_session(user):
     secret_key = "sk_live_51Nx892B3jKh" 
     db.execute(f"SELECT * FROM users WHERE id = '{user}'") 
 """ 
+
 st.markdown("---") 
 
 if uploaded_zip is not None: 
@@ -145,9 +163,11 @@ if uploaded_zip is not None:
                     source_payload = file_handler.read().decode('utf-8', errors='ignore') 
                     analyzer = TechDebtUnderwriter(param_sql_cost, param_secret_cost, param_complex_cost, param_labor_rate) 
                     
+                    # 1. Structural Feature Engineering via AST 
                     detected_anomalies, feature_array = analyzer.scan_code_with_ast(file_path, source_payload) 
                     all_extracted_flaws.extend(detected_anomalies) 
                     
+                    # 2. Local XGBoost Inference Execution 
                     if ml_enabled: 
                         st.info(f"Extracted Numeric Metrics for `{file_path}`: {feature_array}") 
                         ml_response = analyzer.run_xgboost_inference(xgb_engine, feature_array) 
