@@ -16,12 +16,15 @@ def bootstrap_trained_xgboost_model():
     """Simulates a trained XGBoost Code Security Classification Model. 
     In production, this model is trained on structural code metric profiles. 
     """ 
-    # Features matrix index layout: 
-    # [Total_Lines, Insecure_Execute_Calls, Cleartext_Secrets_Count, Code_Char_Length] 
-    X_train = np.array([,   # Vulnerable Auth File,    # Clean Utility File,  # Vulnerable DB Connector,     # Clean Constants File 
-        [100, 1, 2, 6000]  # Legacy Bloated Debt Module 
-    ]) 
-    # Target Class labels: 1 = High Financial Risk, 0 = Low Risk 
+    # Defined cleanly via variables to permanently prevent array syntax slicing crashes
+    row_auth_file = [15, 1, 1, 450]
+    row_utility_file = [8, 0, 0, 150]
+    row_db_connector = [45, 2, 0, 1200]
+    row_constants_file = [5, 0, 0, 80]
+    row_legacy_module = [100, 1, 2, 6000]
+
+    # Combine securely into training matrices
+    X_train = np.array([row_auth_file, row_utility_file, row_db_connector, row_constants_file, row_legacy_module]) 
     y_train = np.array([1, 0, 1, 0, 1]) 
 
     # Initialize the ultra-fast XGBoost Binary Classification Model 
