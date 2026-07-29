@@ -160,17 +160,14 @@ if uploaded_zip is not None:
     all_extracted_flaws = [] 
     with zipfile.ZipFile(io.BytesIO(uploaded_zip.read())) as archive: 
         for file_path in archive.namelist(): 
-            # FIX: Explicit filtration loop avoids evaluating downstream ecosystem orchestration files
             if file_path.endswith('.py') and "wake_app.py" not in file_path: 
                 with archive.open(file_path) as file_handler: 
                     source_payload = file_handler.read().decode('utf-8', errors='ignore') 
                     analyzer = TechDebtUnderwriter(param_sql_cost, param_secret_cost, param_complex_cost, param_labor_rate) 
                     
-                    # 1. Structural Feature Engineering via AST 
                     detected_anomalies, feature_array = analyzer.scan_code_with_ast(file_path, source_payload) 
                     all_extracted_flaws.extend(detected_anomalies) 
                     
-                    # 2. Local XGBoost Inference Execution 
                     if ml_enabled: 
                         st.info(f"Extracted Numeric Metrics for `{file_path}`: {feature_array}") 
                         ml_response = analyzer.run_xgboost_inference(xgb_engine, feature_array) 
@@ -186,8 +183,7 @@ if uploaded_zip is not None:
         with col3: 
             st.metric(label="Identified Code Flaws", value=len(all_extracted_flaws)) 
         st.dataframe(pd.DataFrame(detailed_metrics_list), use_container_width=True) 
-        else: 
-        # 1. Output the clean operational green banner card
+    else: 
         st.success("✨ Ingestion Clean! The analyzed code layers conform entirely to baseline risk standards. Total Liability: ₹0.")
         
         # 2. Compile the raw command line test report format layout string
