@@ -1,32 +1,72 @@
 # 🛡️ Enterprise XGBoost Software Debt Underwriter
+### **Created by Srinivasta**
 
-This repository contains the complete prototype for **TCoE Grant Program - Domain VII (AI, IT & Software, Human-Computer Interaction)**. This platform ingests source code repositories, performs automated Feature Engineering via Abstract Syntax Tree (AST) parsing, uses an embedded **XGBoost Classifier** to detect technical debt, and applies an underwriting rule matrix to calculate the financial risk profile of codebases.
+Fulfilling **TCoE Domain VII: Gradient-Boosted Decision Tree Inference Application**
 
-## 🚀 Live Operational Validation Report
-> [!NOTE]
-> The following validation metrics were generated natively by running this platform on its own codebase via the live Streamlit web deployment.
+**Live Application URL:** [Enterprise XGBoost Software Debt Underwriter](https://my-grant-prototype-cr8hw52mkmr3cp7peejtlu.streamlit.app/)
 
-"The prototype's processing pipeline has been successfully validated using its own live repository branch (`my-grant-prototype-main.zip`, 5.8KB archive size). The Feature Engineering layer successfully parsed multiple concurrent files (`app.py` and `generate_test_data.py`), generating deterministic numerical vector matrices tracing module line length, AST function calls, and total character density logs. The local XGBoost Inference Node successfully classified complex logical structures with a calibrated confidence probability of 60.00%, tagging high architectural technical debt liabilities. The underlying rule-based underwriting matrix dynamically merged slider inputs (₹1,500/hr engineering workforce rate) with a baseline structural penalty (₹50,000), producing an accurate, transparent business risk validation ledger of ₹62,000 over an estimated 8-hour mitigation cycle."
+This repository contains the complete codebase for an intelligent, automated technical debt and code compliance underwriting portal. The prototype utilizes a dual-layer validation engine—combining deterministic Abstract Syntax Tree (AST) scanning with classical machine learning inference via XGBoost—to quantify risk profiling models into actionable monetary financial exposure matrices.
 
 ---
 
-## 📁 Repository Structure
-Your repository tree consists of the following essential modules:
-* `app.py`: The complete 4-Phase Streamlit Web Application and XGBoost inference loop.
-* `generate_test_data.py`: Automated utility script to package synthetic test files into a compressed `.zip` archive.
-* `requirements.txt`: Project dependency declarations for easy reproduction.
-* `README.md`: Project overview and latest validation documentation.
+## 🏗️ Core Repository Architecture
 
-## 🛠️ Local Installation & Execution
-To replicate this operational system on your local workstation, run the following sequential commands in your terminal:
+The platform isolates engine evaluation matrices from deployment scripts to ensure enterprise code hygiene:
 
+```text
+my-grant-prototype/
+│
+├── .github/
+│   └── workflows/
+│       └── test.yml          # GitHub Actions CI automated pipeline integration
+│
+├── app.py                    # Streamlit Web UI, Core 4-Phase Underwriting Pipeline & Plotly Graphs
+├── generate_test_data.py     # Unified Pytest-Native Unit Testing Suite & Fixture Controls
+├── pytest.ini                # Custom collector rule linking pytest to the testing script
+└── requirements.txt          # Defined application & verification matrix dependencies
+```
+
+---
+
+## ⚡ Operational Pipeline Mechanics
+
+The underwriting gateway processes ingestion packages (.zip archives) through four sequential phases:
+
+1. **Phase 1: Feature Engineering via AST Parser**  
+   Strict, deterministic attribute-matching algorithms parse python files into tabular coordinate metrics while filtering infrastructure utilities (e.g., `wake_app.py`) to eliminate algorithmic false-positives.
+2. **Phase 2: XGBoost Machine Learning Inference**  
+   Executes gradient-boosted decision trees over numeric feature coordinates `[Total_Lines, Insecure_Calls, Secrets, Char_Length]` to generate categorical high-risk probability bounds.
+3. **Phase 3: Financial Exposure Calculation Waterfall**  
+   Translates flagged structural security vectors into localized financial liabilities ($\text{INR } ₹$) using custom widget parameters tracking base severity breach costs and engineer labor hours.
+4. **Phase 4: Plotly UI Visual Analytics Mapping**  
+   Outputs interactive data dashboards mapping codebase profile traits beside a live stdout execution container trace log.
+
+---
+
+## 🚀 Quick Start Deployment
+
+### 1. Local Environment Provisioning
+Ensure you have Python 3.10+ installed. Clone the repository workspace and run pip installations:
 ```bash
-# 1. Install required machine learning and application libraries
 pip install -r requirements.txt
+```
 
-# 2. Generate the synthetic test data archive
-python generate_test_data.py
-
-# 3. Boot up the interactive application dashboard
+### 2. Launch the Streamlit Web Application Portal
+Boot up the process container natively to access the interactive web interface:
+```bash
 streamlit run app.py
 ```
+
+### 3. Run the Automated Compliance Pytest Suite
+Thanks to `pytest.ini`, you can trigger our entire test suit matrix simply by typing the base command:
+```bash
+pytest
+```
+
+---
+
+## ⚙️ Automated CI/CD Lifecycle Trace
+
+This system features integrated **GitHub Actions (`test.yml`)** automation loops. Every branch push or pulled merge request spins up an isolated virtual runner environment to execute full compliance matrix assertions against your `generate_test_data.py` definitions.
+
+* **Underwriting Policy Target:** Verified Clean Code Ingestions drop computed portfolio penalties down to a baseline **₹0 Total Liability**.
