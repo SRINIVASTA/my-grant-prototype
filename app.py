@@ -14,25 +14,25 @@ from sklearn.preprocessing import LabelEncoder
 # ===================================================================== 
 @st.cache_resource 
 def bootstrap_trained_xgboost_model(): 
-    """Simulates a trained XGBoost Code Security Classification Model. 
-    In production, this model is trained on structural code metric profiles. 
+    """Simulates a dynamically responsive XGBoost Code Security Classification Model.
+    The expanded training matrix prevents static 60% probability locks by introducing
+    diverse operational code feature layouts.
     """ 
-    # Defined cleanly via variables to permanently prevent array syntax slicing crashes
-    row_auth_file = [120, 3, 1, 4500]
-    row_utility_file = [45, 0, 0, 1200]
-    row_db_connector = [250, 5, 0, 11500]
-    row_constants_file = [15, 0, 0, 350]
-    row_legacy_module = [310, 0, 0, 6000]
-
-    # Combine securely into training matrices
-    X_train = np.array([row_auth_file, row_utility_file, row_db_connector, row_constants_file, row_legacy_module]) 
-    y_train = np.array([1, 0, 1, 0, 1]) 
+    # [Total_Lines, Insecure_Execute_Calls, Cleartext_Secrets_Count, Code_Char_Length] 
+    X_train = np.array([,    # Row 1: High Risk (1) - Vulnerable Auth File,     # Row 2: Low Risk (0)  - Clean Utility File,   # Row 3: High Risk (1) - Vulnerable DB Connector,      # Row 4: Low Risk (0)  - Clean Constants File,    # Row 5: High Risk (1) - Legacy Bloated Debt Module
+        
+        # Extended matrix patterns to enable dynamic gradient percentage outputs:,      # Row 6: Low Risk (0)  - Tiny clean snippet,     # Row 7: Low Risk (0)  - Small clean utility script,  # Row 8: High Risk (1) - Mega critical vulnerable file,  # Row 9: Low Risk (0)  - Massive file but 100% compliant,    # Row 10: High Risk (1) - Medium file with SQL exposure
+        [95, 0, 1, 3800]      # Row 11: High Risk (1) - Standard file with a leaked token
+    ]) 
+    
+    # Matching target class assignments: 0 = Low Risk, 1 = High Risk
+    y_train = np.array([1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1]) 
 
     # Initialize the ultra-fast XGBoost Binary Classification Model 
     xgb_model = xgb.XGBClassifier( 
-        max_depth=3, 
-        learning_rate=0.1, 
-        n_estimators=10, 
+        max_depth=4,         # Increased slightly to trace complex decision boundaries
+        learning_rate=0.05,  # Smoothed learning rates to map natural curves
+        n_estimators=50,     # Increased estimator tree iterations for non-static percentage shifts
         objective='binary:logistic' 
     ) 
     # Perform standard mathematical model fitting across the numerical feature spaces 
