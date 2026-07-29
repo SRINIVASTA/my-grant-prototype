@@ -18,12 +18,23 @@ def bootstrap_trained_xgboost_model():
     The expanded training matrix prevents static 60% probability locks by introducing
     diverse operational code feature layouts.
     """ 
-    # [Total_Lines, Insecure_Execute_Calls, Cleartext_Secrets_Count, Code_Char_Length] 
-    X_train = np.array([,    # Row 1: High Risk (1) - Vulnerable Auth File,     # Row 2: Low Risk (0)  - Clean Utility File,   # Row 3: High Risk (1) - Vulnerable DB Connector,      # Row 4: Low Risk (0)  - Clean Constants File,    # Row 5: High Risk (1) - Legacy Bloated Debt Module
-        
-        # Extended matrix patterns to enable dynamic gradient percentage outputs:,      # Row 6: Low Risk (0)  - Tiny clean snippet,     # Row 7: Low Risk (0)  - Small clean utility script,  # Row 8: High Risk (1) - Mega critical vulnerable file,  # Row 9: Low Risk (0)  - Massive file but 100% compliant,    # Row 10: High Risk (1) - Medium file with SQL exposure
-        [95, 0, 1, 3800]      # Row 11: High Risk (1) - Standard file with a leaked token
-    ]) 
+    # [Total_Lines, Insecure_Execute_Calls, Cleartext_Secrets_Count, Code_Char_Length]
+    row1 = [120, 3, 1, 4500]   # High Risk (1) - Vulnerable Auth File
+    row2 = [45, 0, 0, 1200]    # Low Risk (0)  - Clean Utility File
+    row3 = [250, 5, 0, 11500]  # High Risk (1) - Vulnerable DB Connector
+    row4 = [15, 0, 0, 350]     # Low Risk (0)  - Clean Constants File
+    row5 = [310, 0, 0, 6000]   # High Risk (1) - Legacy Bloated Debt Module
+    
+    # Extended metrics patterns to create non-static gradient percentage shifts
+    row6 = [12, 0, 0, 250]     # Low Risk (0)  - Tiny clean snippet
+    row7 = [65, 0, 0, 2100]    # Low Risk (0)  - Small clean utility script
+    row8 = [850, 14, 4, 45000] # High Risk (1) - Mega critical vulnerable file
+    row9 = [1200, 0, 0, 65000] # Low Risk (0)  - Massive file but 100% compliant
+    row10 = [180, 2, 0, 8500]  # High Risk (1) - Medium file with SQL exposure
+    row11 = [95, 0, 1, 4100]   # High Risk (1) - Standard file with a leaked token
+
+    # Combine cleanly into a multi-dimensional array matrix
+    X_train = np.array([row1, row2, row3, row4, row5, row6, row7, row8, row9, row10, row11]) 
     
     # Matching target class assignments: 0 = Low Risk, 1 = High Risk
     y_train = np.array([1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1]) 
@@ -32,7 +43,7 @@ def bootstrap_trained_xgboost_model():
     xgb_model = xgb.XGBClassifier( 
         max_depth=4,         # Increased slightly to trace complex decision boundaries
         learning_rate=0.05,  # Smoothed learning rates to map natural curves
-        n_estimators=50,     # Increased estimator tree iterations for non-static percentage shifts
+        n_estimators=50,     # Increased estimator tree iterations for dynamic percentage shifts
         objective='binary:logistic' 
     ) 
     # Perform standard mathematical model fitting across the numerical feature spaces 
