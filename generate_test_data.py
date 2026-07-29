@@ -1,73 +1,67 @@
+import pytest
 import zipfile
 import io
 import os
+import numpy as np
 from app import TechDebtUnderwriter, bootstrap_trained_xgboost_model
 
-def create_mock_zip(filename, file_content):
-    """Dynamically packages code payloads into an in-memory ZIP archive."""
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-        zip_file.writestr(filename, file_content)
-    zip_buffer.seek(0)
-    return zip_buffer
+# ===================================================================== 
+# PYTEST REUSABLE FIXTURES LAYER
+# ===================================================================== 
+@pytest.fixture
+def base_underwriter():
+    """Provides a fresh, standard instance of TechDebtUnderwriter for tests."""
+    # Instantiated with standard defaults: SQLi=500k, Secret=250k, TechDebt=50k, labor=1500
+    return TechDebtUnderwriter(500000, 250000, 50000, 1500)
 
-def run_automated_suite():
-    print("====================================================")
-    print("🚀 INITIALIZING AUTOMATED XGBOOST TEST SUITE")
-    print("====================================================\n")
 
-    # 1. Initialize the target underwriter logic under baseline cost variables
-    # (SQLi Penalty: 500k, Secret Penalty: 250k, Tech Debt Penalty: 50k, Hourly Rate: 1500)
-    underwriter = TechDebtUnderwriter(500000, 250000, 50000, 1500)
-    xgb_model = bootstrap_trained_xgboost_model()
+@pytest.fixture
+def trained_model():
+    """Provides the process memory weights of the XGBoost classifier model."""
+    return bootstrap_trained_xgboost_model()
 
-    # ----------------------------------------------------
-    # TEST CASE 1: True Positive - SQL Injection Detection
-    # ----------------------------------------------------
-    print("[TEST 1] Testing True Positive SQL Injection Engine...")
-    sqli_payload = """def lookup_user(user_id):\n    cursor.execute(f"SELECT * FROM accounts WHERE id = '{user_id}'")"""
-    flaws, metrics = underwriter.scan_code_with_ast("auth_module.py", sqli_payload)
-    
-    assert any(f[0] == "SQL_INJECTION" for f in flaws), "❌ FAILED: SQL Injection was not caught by AST Parser!"
-    print("  ✅ PASSED: SQL Injection signature accurately caught via AST parsing.")
-    print(f"  📊 Extracted Feature Vector: {metrics}\n")
 
-    # ----------------------------------------------------
-    # TEST CASE 2: False Positive Mitigation - Selenium Check
-    # ----------------------------------------------------
-    print("[TEST 2] Testing False Positive Handling (Selenium wake_app.py)...")
-    selenium_payload = """def wake_browser():\n    driver.execute_script("console.log('App Waking');")"""
-    
-    # Simulate how app.py handles files inside the main loop
-    # If the file path matches 'wake_app.py', it shouldn't log vulnerabilities
-    flaws_selenium, metrics_selenium = underwriter.scan_code_with_ast("wake_app.py", selenium_payload)
-    
-    # Verify our strict matching adjustment works
-    # It shouldn't match 'execute_script' as a SQL 'execute' call
-    has_false_sqli = any(f[0] == "SQL_INJECTION" for f in flaws_selenium)
-    
-    if not has_false_sqli:
-        print("  ✅ PASSED: Strict string matching successfully filtered out browser execute_script calls.")
-    else:
-        print("  ⚠️ WARNING: Core AST matching caught string signature. Ensuring file routing filters are active.")
-    print(f"  📊 Extracted Feature Vector: {metrics_selenium}\n")
+# ===================================================================== 
+# FORMAL PYTEST ASSERTION TEST SUITE
+# ===================================================================== 
 
-    # ----------------------------------------------------
-    # TEST CASE 3: Financial Exposure Calculation Validation
-    # ----------------------------------------------------
-    print("[TEST 3] Validating Underwriting Rule Cost Calculations...")
-    # Base SQLi penalty is 500,000. Remediation time is 12 hours * 1,500 hourly rate = 18,000.
-    # Total targeted financial exposure should equal exactly 518,000.
-    total_liability, remediation_hours, breakdown = underwriter.evaluate_monetary_exposure(flaws)
+def test_sql_injection_detection(base_underwriter):
+    """Verifies that dynamic string concatenation in query calls triggers AST alarms."""
+    sqli_payload = "def query(uid):\n    cursor.execute(f'SELECT * FROM clients WHERE id = {uid}')"
+    flaws, metrics = base_underwriter.scan_code_with_ast("auth_file.py", sqli_payload)
     
+    # Assertions check the structural results dictionary directly
+    assert any(flaw_type == "SQL_INJECTION" for flaw_type, _ in flaws), "AST failed to catch SQL Injection payload!"
+    assert metrics[1] == 1, "Metrics layout failed to record the insecure database call vector."
+
+
+def test_selenium_false_positive_mitigation(base_underwriter):
+    """Ensures browser automation scripts are successfully white-listed by exact naming matches."""
+    selenium_payload = "def wake_container():\n    driver.execute_script('arguments[0].click();', btn)"
+    flaws, metrics = base_underwriter.scan_code_with_ast("wake_app.py", selenium_payload)
+    
+    has_false_alert = any(flaw_type == "SQL_INJECTION" for flaw_type, _ in flaws)
+    assert not has_false_alert, "Selenium driver commands are triggering algorithmic false positives!"
+    assert metrics[1] == 0, "Insecure database metric layout column should read exactly 0."
+
+
+def test_monetary_exposure_waterfall(base_underwriter):
+    """Validates the financial risk cost matrix calculations against rule models."""
+    sample_flaws = [("SQL_INJECTION", "Dynamic string execution vulnerability.")]
+    total_liability, total_hours, breakdown = base_underwriter.evaluate_monetary_exposure(sample_flaws)
+    
+    # Mathematical Validation Check: Base Penalty (500k) + Labor (12 hours * 1,500/hr = 18k) = 518,000
     expected_liability = 518000
-    assert total_liability == expected_liability, f"❌ FAILED: Mathematical mismatch! Expected {expected_liability}, got {total_liability}"
-    print(f"  ✅ PASSED: Financial Waterfall calculations verified.")
-    print(f"  💰 Calculated Financial Risk Penalty: ₹{total_liability:,} across {remediation_hours} engineering hours.\n")
+    assert total_liability == expected_liability, f"Cost mismatch. Expected {expected_liability}, evaluated {total_liability}."
+    assert total_hours == 12, "Remediation workforce target hours are configured incorrectly."
 
-    print("====================================================")
-    print("🎉 ALL TESTS PASSED SUCCESSFULLY! COMPLIANCE CHANNELS UNLOCKED.")
-    print("====================================================")
 
-if __name__ == "__main__":
-    run_automated_suite()
+def test_xgboost_pipeline_inference(trained_model):
+    """Verifies the underlying ML node engine accepts vector array coordinates and infers safely."""
+    # Test an input profile vector: [Lines, Insecure_Calls, Secrets, Char_Length]
+    mock_clean_vector = [10, 0, 0, 120]
+    input_data = np.array([mock_clean_vector])
+    
+    prediction = trained_model.predict(input_data)[0]
+    # Predict output classifications: 0 = Low Risk, 1 = High Risk
+    assert prediction in [0, 1], "XGBoost engine returned an invalid categorical distribution prediction boundary."
