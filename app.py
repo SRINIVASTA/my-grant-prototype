@@ -6,6 +6,7 @@ import re
 import zipfile 
 import io 
 import xgboost as xgb 
+import plotly.express as px
 from sklearn.preprocessing import LabelEncoder 
 
 # ===================================================================== 
@@ -17,11 +18,11 @@ def bootstrap_trained_xgboost_model():
     In production, this model is trained on structural code metric profiles. 
     """ 
     # Defined cleanly via variables to permanently prevent array syntax slicing crashes
-    row_auth_file = [15, 1, 1, 450]
-    row_utility_file = [8, 0, 0, 150]
-    row_db_connector = [45, 2, 0, 1200]
-    row_constants_file = [5, 0, 0, 80]
-    row_legacy_module = [100, 1, 2, 6000]
+    row_auth_file = [120, 3, 1, 4500]
+    row_utility_file = [45, 0, 0, 1200]
+    row_db_connector = [250, 5, 0, 11500]
+    row_constants_file = [15, 0, 0, 350]
+    row_legacy_module = [310, 0, 0, 6000]
 
     # Combine securely into training matrices
     X_train = np.array([row_auth_file, row_utility_file, row_db_connector, row_constants_file, row_legacy_module]) 
@@ -47,7 +48,6 @@ class TechDebtUnderwriter:
             "HARDCODED_SECRET": {"base_liability_inr": secret_cost, "severity": "HIGH", "remediation_hours": 4}, 
             "COMPLEX_LOGIC_BLOCK": {"base_liability_inr": complexity_cost, "severity": "MEDIUM", "remediation_hours": 8} 
         } 
-
     def scan_code_with_ast(self, filename, code_string): 
         """Phase 1 Feature Extraction: Transforms raw code characters into numerical metric indicators.""" 
         findings = [] 
@@ -91,7 +91,7 @@ class TechDebtUnderwriter:
         input_data = np.array([feature_vector]) 
         
         # Calculate probability and predicted high-risk class allocations 
-        prediction = model_engine.predict(input_data)[0] 
+        prediction = model_engine.predict(input_data) 
         probability = model_engine.predict_proba(input_data)[0][1] * 100 
         
         risk_tag = "🔴 HIGH FINANCIAL LIABILITY RISK" if prediction == 1 else "🟢 COMPLIANT/LOW RISK" 
@@ -121,8 +121,6 @@ class TechDebtUnderwriter:
                     "Total Exposure": combined_liability 
                 }) 
         return total_liability, total_hours, detailed_breakdown 
-
-
 # ===================================================================== 
 # STREAMLIT HCI INTERACTIVE DASHBOARD USER INTERFACE 
 # ===================================================================== 
@@ -158,16 +156,22 @@ st.markdown("---")
 
 if uploaded_zip is not None: 
     all_extracted_flaws = [] 
+    last_processed_vector = [0, 0, 0, 0]
+    
     with zipfile.ZipFile(io.BytesIO(uploaded_zip.read())) as archive: 
         for file_path in archive.namelist(): 
+            # FIX: Explicit filtration loop avoids evaluating downstream ecosystem orchestration files
             if file_path.endswith('.py') and "wake_app.py" not in file_path: 
                 with archive.open(file_path) as file_handler: 
                     source_payload = file_handler.read().decode('utf-8', errors='ignore') 
                     analyzer = TechDebtUnderwriter(param_sql_cost, param_secret_cost, param_complex_cost, param_labor_rate) 
                     
+                    # 1. Structural Feature Engineering via AST 
                     detected_anomalies, feature_array = analyzer.scan_code_with_ast(file_path, source_payload) 
                     all_extracted_flaws.extend(detected_anomalies) 
+                    last_processed_vector = feature_array
                     
+                    # 2. Local XGBoost Inference Execution 
                     if ml_enabled: 
                         st.info(f"Extracted Numeric Metrics for `{file_path}`: {feature_array}") 
                         ml_response = analyzer.run_xgboost_inference(xgb_engine, feature_array) 
@@ -184,9 +188,39 @@ if uploaded_zip is not None:
             st.metric(label="Identified Code Flaws", value=len(all_extracted_flaws)) 
         st.dataframe(pd.DataFrame(detailed_metrics_list), use_container_width=True) 
     else: 
-        st.success("✨ Ingestion Clean! The analyzed code layers conform entirely to baseline risk standards. Total Liability: ₹0.")
+        # 1. Output clean operational green banner card
+        st.success("✨ Ingestion Clean! The analyzed code layers conform entirely to baseline risk standards. Total Liability: ₹0.") 
         
-        # 2. Compile the raw command line test report format layout string
+        # 2. Add the Interactive Plotly Metric Visualization Breakdown
+        st.subheader("📊 Ingested Code Profile Metrics Summary")
+        
+        metrics_data = pd.DataFrame({
+            "Metric Dimension": ["Total Lines of Code", "Insecure Execute Calls", "Hardcoded Cleartext Secrets", "Total Code Characters"],
+            "Measured Quantity": [last_processed_vector[0], last_processed_vector[1], last_processed_vector[2], last_processed_vector[3]]
+        })
+        
+        fig = px.bar(
+            metrics_data, 
+            y="Metric Dimension", 
+            x="Measured Quantity", 
+            orientation='h',
+            text="Measured Quantity",
+            color="Metric Dimension",
+            color_discrete_sequence=["#1E88E5", "#D32F2F", "#F57C00", "#4CAF50"],
+            template="plotly_dark"
+        )
+        
+        fig.update_layout(
+            showlegend=False,
+            height=280,
+            margin=dict(l=20, r=20, t=20, b=20),
+            xaxis_title="Extracted Count Dimensions",
+            yaxis_title=""
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # 3. Compile the raw command line test report format layout string
+        st.subheader("🖥️ Live Container Standard Output Log")
         terminal_report_log = f"""====================================================
 🚀 RUNNING AUTOMATED COMPLIANCE SUITE VALIDATION
 ====================================================
@@ -196,7 +230,7 @@ if uploaded_zip is not None:
   -> Core Target Found: Completed Processing
 
 [STAGE 2] Running Abstract Syntax Tree (AST) Parsing Filters...
-  -> Extracted Structural Code Vector: [Verified]
+  -> Extracted Structural Code Vector: {last_processed_vector}
   -> Insecure SQL Execute Assertions: 0 Found
   -> Cleartext Secrets / Hardcoded Tokens: 0 Found
 
@@ -212,10 +246,8 @@ if uploaded_zip is not None:
 ====================================================
 🎉 TEST SUITE EXECUTED WITH PERFECTION: TOTAL LIABILITY = ₹0
 ====================================================\n"""
-        
-        # 3. Render the raw console window output on the dashboard screen interface
-        st.subheader("🖥️ Live Container Standard Output Log")
         st.code(terminal_report_log, language="text")
+
 else: 
     st.info("ℹ️ Displaying baseline simulation view. Toggle your configurations or add a target repository zip file package.") 
     analyzer = TechDebtUnderwriter(param_sql_cost, param_secret_cost, param_complex_cost, param_labor_rate) 
