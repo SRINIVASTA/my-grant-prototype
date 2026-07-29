@@ -1,0 +1,33 @@
+# .github/workflows/test.yml
+name: TCoE Domain VII Compliance Suite Automation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  compliance-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository code layers
+      uses: actions/checkout@v4
+
+    - name: Initialize Runtime Environment (Python 3.10)
+      uses: actions/setup-python@v5
+      with:
+        python-month: '3.10'
+        cache: 'pip'
+
+    - name: Ingest Shared System Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pytest xgboost scikit-learn numpy pandas streamlit
+
+    - name: Run Pytest Validation Matrix Engine
+      run: |
+        # Pytest will automatically discover generate_test_data.py via pytest.ini configuration
+        pytest
