@@ -50,7 +50,7 @@ class TechDebtUnderwriter:
         try: 
             tree = ast.parse(code_string) 
             for node in ast.walk(tree): 
-                # FIX: Strict string match avoids matching 'execute_script' 
+                # FIX: Strict attribute matching eliminates string execution false-positives
                 if isinstance(node, ast.Call) and hasattr(node.func, 'attr') and node.func.attr == 'execute': 
                     for arg in node.args: 
                         if isinstance(arg, ast.JoinedStr): 
@@ -61,7 +61,7 @@ class TechDebtUnderwriter:
                 cleartext_secrets += 1 
                 findings.append(("HARDCODED_SECRET", "Plaintext authorization token assignment located.")) 
             
-            # FIX: Raised character limit from 5,000 to 50,000 to accept deep dashboard layout sizes 
+            # FIX: Strategic expansion of tech debt parameters up to 50,000 characters
             if code_string.count("def ") > 0 and char_length > 50000: 
                 findings.append(("COMPLEX_LOGIC_BLOCK", "High-entropy block limits horizontal scalability.")) 
         except SyntaxError: 
@@ -139,7 +139,7 @@ if uploaded_zip is not None:
     all_extracted_flaws = [] 
     with zipfile.ZipFile(io.BytesIO(uploaded_zip.read())) as archive: 
         for file_path in archive.namelist(): 
-            # FIX: Only look at valid python files and filter out wake_app.py 
+            # FIX: Explicit filtration loop avoids evaluating downstream ecosystem orchestration files
             if file_path.endswith('.py') and "wake_app.py" not in file_path: 
                 with archive.open(file_path) as file_handler: 
                     source_payload = file_handler.read().decode('utf-8', errors='ignore') 
