@@ -61,7 +61,8 @@ class TechDebtUnderwriter:
         try:
             tree = ast.parse(code_string)
             for node in ast.walk(tree):
-                if isinstance(node, ast.Call) and hasattr(node.func, 'attr') and node.func.attr == 'execute':
+                # Force an exact string equality check on the method attribute name
+                if isinstance(node, ast.Call) and hasattr(node.func, 'attr') and node.func.attr == 'execute' and node.func.attr != 'execute_script':
                     for arg in node.args:
                         if isinstance(arg, ast.JoinedStr):
                             insecure_executes += 1
