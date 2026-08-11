@@ -9,6 +9,42 @@ import xgboost as xgb
 import plotly.express as px
 from sklearn.preprocessing import LabelEncoder 
 
+# --- FORCE STREAMLIT TO HIDE CHROME, HEADERS, AND FOOTERS ---
+st.markdown("""
+    <style>
+    /* 1. Hide the entire top header toolbar (Deploy, Share, Options menu) */
+    [data-testid="stHeader"], header {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* 2. Hide the running status loading elements */
+    [data-testid="stStatusWidget"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* 3. Hide GitHub connection buttons or fork badges */
+    .viewerBadge_container__17w1a, #GithubIcon, .styles_viewerBadge__1yB5_ {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* 4. Hide the native main menu hamburger icon */
+    #MainMenu {
+        visibility: hidden !important;
+        display: none !important;
+    }
+
+    /* 5. Hide the default Streamlit footer */
+    footer {
+        visibility: hidden !important;
+        display: none !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
 # ===================================================================== 
 # MACHINE LEARNING ENGINE LAYER (Tabular Feature Extraction & XGBoost) 
 # ===================================================================== 
@@ -265,3 +301,50 @@ else:
     simulated_flaws, sample_vector = analyzer.scan_code_with_ast("demo.py", fallback_code_demo) 
     total_loss, hours_required, detailed_metrics_list = analyzer.evaluate_monetary_exposure(simulated_flaws) 
     st.table(pd.DataFrame(detailed_metrics_list))
+
+# High-visibility fixed footer with professional contact links
+st.markdown(
+    """
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #262730; /* Matches your secondary background */
+        color: #FAFAFA;            /* Matches your theme text color */
+        text-align: center;
+        font-size: 13px;
+        padding: 12px 0;
+        z-index: 999999;           /* Forces footer to stay on top of everything */
+        border-top: 1px solid #FF4B4B; /* Adds a thin red line accent */
+    }
+    .footer a {
+        color: #FF4B4B;            /* Uses your primary theme red color for links */
+        text-decoration: none;
+        margin: 0 10px;
+        font-weight: bold;
+    }
+    .footer a:hover {
+        text-decoration: underline;
+        color: #FAFAFA;            /* Turns white when hovered */
+    }
+    .footer-separator {
+        color: #666;
+        margin: 0 5px;
+    }
+    /* Adds padding to the bottom of the page container so content isn't blocked */
+    .main .block-container {
+        padding-bottom: 70px;
+    }
+    </style>
+    <div class="footer">
+        <span><strong>© 2026 T A Srinivas.</strong> All Rights Reserved. Strictly for portfolio viewing purposes.</span>
+        <span class="footer-separator">|</span>
+        <a href="https://www.linkedin.com/in/srinivas-t-a-557637119/" target="_blank">LinkedIn Profile</a>
+        <span class="footer-separator">|</span>
+        <a href="mailto:tasrinivass@gmail.com">Contact Me</a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
